@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arabic Class 3 - Year End Review (Fixed)</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Amiri:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --dark: #292F36;
+            --light: #F7FFF7;
+            --correct: #2ECC71;
+            --wrong: #E74C3C;
+        }
+
+        * { box-sizing: border-box; user-select: none; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--secondary);
+            background-image: radial-gradient(#ffffff 20%, transparent 20%), radial-gradient(#ffffff 20%, transparent 20%);
+            background-position: 0 0, 50px 50px;
+            background-size: 100px 100px;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--dark);
+            overflow: hidden;
+        }
+
+        #app-container {
+            background: white;
+            width: 90%;
+            max-width: 900px;
+            height: 90vh;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            border: 8px solid var(--accent);
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .progress-container { width: 100%; height: 10px; background: #eee; }
+        .progress-bar { height: 100%; background: var(--accent); width: 0%; transition: width 0.5s ease; }
+
+        main {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .screen { display: none; width: 100%; animation: fadeIn 0.5s ease-out; }
+        .screen.active { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Start Screen --- */
+        .title-big { font-family: 'Fredoka', sans-serif; font-size: 3rem; color: var(--primary); margin-bottom: 10px; text-shadow: 2px 2px 0px var(--accent); }
+        .start-btn { padding: 15px 40px; font-size: 1.5rem; background: var(--correct); color: white; border: none; border-radius: 50px; cursor: pointer; font-family: 'Fredoka', sans-serif; box-shadow: 0 6px 0 #27ae60; transition: transform 0.1s; }
+        .start-btn:active { transform: translateY(6px); box-shadow: none; }
+
+        /* --- Question Styles --- */
+        .question-text { font-size: 1.4rem; font-weight: 700; margin-bottom: 20px; line-height: 1.5; }
+        .arabic-text { font-family: 'Amiri', serif; font-size: 2.5rem; color: var(--primary); direction: rtl; margin: 10px 0; }
+
+        /* --- Multiple Choice --- */
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; width: 100%; }
+        .option-btn {
+            background: white; border: 3px solid #ddd; border-radius: 15px; padding: 20px; font-size: 1.2rem; font-family: 'Amiri', serif;
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; min-height: 80px;
+        }
+        .option-btn:hover { border-color: var(--secondary); background: #f0fffd; transform: translateY(-2px); }
+        .option-btn:active { transform: translateY(0); }
+
+        .option-btn.correct-state { background-color: var(--correct) !important; color: white; border-color: var(--correct); }
+        .option-btn.wrong-state { background-color: var(--wrong) !important; color: white; border-color: var(--wrong); opacity: 0.7; }
+
+        /* --- Teacher Controls --- */
+        .controls-area {
+            margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 15px; width: 100%; border: 2px dashed #ccc;
+            display: none;
+        }
+        .controls-area.visible { display: flex; justify-content: center; gap: 30px; animation: popIn 0.3s; }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .check-btn { font-family: 'Fredoka', sans-serif; padding: 12px 30px; border: none; border-radius: 10px; font-size: 1.2rem; cursor: pointer; color: white; box-shadow: 0 4px 0 rgba(0,0,0,0.2); transition: all 0.1s; }
+        .btn-correct { background: var(--correct); }
+        .btn-wrong { background: var(--wrong); }
+        .check-btn:active { transform: translateY(4px); box-shadow: none; }
+
+        .teacher-tools { margin-top: 10px; display: none; }
+        
+        .reveal-btn { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            padding: 10px 25px; 
+            border-radius: 50px; 
+            font-size: 1.2rem;
+            font-weight: bold; 
+            cursor: pointer;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+        .reveal-btn:active { transform: translateY(4px); box-shadow: none; }
+
+        /* --- Essay Styles --- */
+        .input-display { font-family: 'Amiri', serif; font-size: 1.5rem; border-bottom: 2px solid var(--secondary); padding: 10px; min-width: 300px; display: inline-block; background: #fff; margin-bottom: 15px; color: var(--primary); min-height: 50px; }
+        .hidden-answer { background: #eee; color: #333; border-radius: 10px; padding: 20px; margin-top: 15px; font-family: 'Amiri', serif; font-size: 1.5rem; display: none; width: 95%; border: 2px solid var(--primary); }
+
+        /* --- Feedback --- */
+        #feedback-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; justify-content: center; align-items: center; z-index: 100; }
+        .feedback-text { font-size: 5rem; font-weight: bold; text-shadow: 0 5px 0 rgba(0,0,0,0.2); opacity: 0; transform: scale(0.5); font-family: 'Fredoka', sans-serif; }
+
+        footer { padding: 10px; text-align: center; font-size: 0.9rem; color: #777; background: #f0f0f0; }
+        @media (max-width: 600px) { .options-grid { grid-template-columns: 1fr; } .title-big { font-size: 2rem; } }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <header>Year End Review: Arabic Class 3</header>
+    <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+
+    <main>
+        <!-- START SCREEN -->
+        <div id="start-screen" class="screen active">
+            <div class="title-big">Arabic Quiz Time!</div>
+            <p style="font-size: 1.2rem; color: #555;">Let's review what we learned this year!</p>
+            <div style="font-size: 4rem; margin: 20px;">🌟</div>
+            <button class="start-btn" onclick="startQuiz()">Start Quiz!</button>
+        </div>
+
+        <!-- QUIZ SCREEN -->
+        <div id="quiz-screen" class="screen">
+            <div style="color: var(--primary); font-weight: bold;">Question <span id="q-number">1</span></div>
+            <div id="question-content"></div>
+
+            <!-- Teacher Controls -->
+            <div class="controls-area" id="controls-area">
+                <span style="align-self: center; font-weight: bold; color: #555;">Teacher Check:</span>
+                <button class="check-btn btn-correct" onclick="submitEssay(true)">✓ Correct</button>
+                <button class="check-btn btn-wrong" onclick="submitEssay(false)">✗ Wrong</button>
+            </div>
+
+            <div class="teacher-tools" id="teacher-tools">
+                <!-- FIXED: Added onclick event here -->
+                <button class="reveal-btn" id="static-reveal-btn" onclick="toggleAnswer()">SHOW ANSWER</button>
+            </div>
+        </div>
+
+        <!-- END SCREEN -->
+        <div id="end-screen" class="screen">
+            <div class="title-big">Great Job!</div>
+            <p>You have completed the review.</p>
+            <div style="font-size: 3rem; margin: 20px;">🎉</div>
+            <h2 id="final-score" style="color: var(--primary); font-size: 2.5rem;"></h2>
+            <button class="start-btn" onclick="location.reload()">Play Again</button>
+        </div>
+    </main>
+
+    <footer>Class 3 Arabic Interactive Review</footer>
+    <div id="feedback-overlay"><div id="feedback-msg" class="feedback-text"></div></div>
+</div>
+
+<script>
+    const quizData = [
+        // ... (data kuis tetap sama seperti sebelumnya)
+        { type: "mcq", question: "My Mother is going to the market now.<br>Which word means mother?", options: ["وَالِدٌ", "وَالِدَةٌ", "اِبْنَةٌ"], correctIndex: 1 },
+        { type: "mcq", question: "Mr Ikbal needs to pick up his daughter at 12 o’clock.<br>Which word describes daughter?", options: ["اِبْنٌ", "اِبْنَةٌ", "زَمِيْلَةٌ"], correctIndex: 1 },
+        { type: "mcq", question: "Rio says, “Hadza Waalidiy, Ahmad”.<br>Based on the sentence above, who is Ahmad?", options: ["Rio’s friend", "Rio’s son", "Rio’s Father"], correctIndex: 2 },
+        { type: "mcq", question: "I want to ask Jasmine about her age.<br>Which sentence is correct?", options: ["كَمْ عُمُرُكِ", "كَمْ عُمُرُكَ", "عُمُرِيْ تِسْعُ سَنَوَاتِ"], correctIndex: 0 },
+        { type: "mcq", question: "Velove says, “عُمُرِيْ عَشْرُ سَنَوَاتِ”<br>From the sentence above, we know that Velove is..", options: ["9 years old", "10 years old", "11 years old"], correctIndex: 1 },
+        { type: "mcq", question: "Shena wants to introduce her female friend.<br>What should she say?", options: ["هَذِهِ اِبْنَتِيْ", "هَذِهِ وَالِدَتِيْ", "هَذِهِ زِمِيْلَتِيْ"], correctIndex: 2 },
+        { type: "mcq", question: "Which word has dhommah and waw sukun?", options: ["كَلَامٌ", "صَبُوْرٌ", "عِلْمٌ"], correctIndex: 1 },
+        { type: "mcq", question: "How do we read dhommah and waw sukun in a sentence?", options: ["Read for long 2 harakat", "Read shortly", "Read for 3 harakat"], correctIndex: 0 },
+        { type: "mcq", question: "Kenzou asks to Quilla, “Kam Umuruka?” (Correct or Wrong?)", note: "Note: Kenzou (Boy) asks Quilla (Girl). 'Umuruka' is for boy.", options: ["Correct (✓)", "Wrong (✗)"], correctIndex: 1 },
+        { type: "mcq", question: "Danish said, \"هَذَا وَالِدَتِيْ\" (Correct or Wrong?)", note: "Note: 'Hadza' is for male. 'Hadzihi' is for female.", options: ["Correct (✓)", "Wrong (✗)"], correctIndex: 1 },
+        { type: "mcq", question: "I ask Ms Puspa, “Kam Umuruki?” (Correct or Wrong?)", note: "Note: Asking Ms Puspa (Female).", options: ["Correct (✓)", "Wrong (✗)"], correctIndex: 0 },
+        { type: "mcq", question: "Kalila said, \"هَذِهِ زَمِيْلَتِيْ\" (Correct or Wrong?)", note: "Note: Introducing female friend.", options: ["Correct (✓)", "Wrong (✗)"], correctIndex: 0 },
+        { type: "essay", question: "Make a conversation in Arabic between two people talking about age!", instruction: "Ask the student to answer verbally.", answer: "KAM UMURUKA? UMURIY TIS'U SANAWATIN" },
+        { 
+            type: "essay", 
+            question: "Translate this conversation into English!", 
+            content: "Deylila : كَمْ عُمُرُكِ؟<br>Ms Sri : عُمُرِيْ أَرْبَعُونَ عَامًا", 
+            instruction: "Ask student to translate.", 
+            answer: "Deylila: How old are you?<br>Ms Sri: I am forty years old." 
+        },
+        { type: "essay", question: "Make sentences using these words:", content: "1. Waalidatiy<br>2. Umuriy", instruction: "Ask the student to make sentences.", answer: "1. HADZIHI WAALIDATIY<br>2. UMURIY ASYRU SANAWAATIN" },
+        { type: "essay", question: "Connect these letters:", content: "صَ – بُ – وْ – رٌ", instruction: "Ask student to read the word.", answer: "صَبُوْرٌ" },
+        { type: "essay", question: "Connect these letters with waw sukun.", content: "Example : ج → جُوْ<br>ص → ?<br>ز → ?", instruction: "Ask student to write the letters.", answer: "صُوْ (Suu)<br>زُوْ (Zuu)" }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let isTransitioning = false;
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // --- SOUND ENGINE LEBIH HEBOH ---
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+
+        if (type === 'click') {
+            createTone(600, 300, 0.1, 'sine');
+        } else if (type === 'correct') {
+            // Arpeggio Chord (Heboh/Ceria)
+            createTone(523.25, 523.25, 0.6, 'square', 0.05); // C5
+            createTone(659.25, 659.25, 0.6, 'square', 0.15); // E5
+            createTone(783.99, 783.99, 0.6, 'square', 0.25); // G5
+            createTone(1046.50, 1046.50, 0.8, 'sine', 0.35); // C6 Final Sparkle
+        } else if (type === 'wrong') {
+            // Low Distorted Slide (Gagal)
+            createTone(300, 100, 0.5, 'sawtooth', 0);
+            createTone(290, 90, 0.5, 'triangle', 0.05);
+        }
+    }
+
+    function createTone(freqStart, freqEnd, duration, type, delay = 0) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = type;
+        osc.frequency.setValueAtTime(freqStart, audioCtx.currentTime + delay);
+        osc.frequency.exponentialRampToValueAtTime(freqEnd, audioCtx.currentTime + delay + duration);
+        
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + duration);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(audioCtx.currentTime + delay);
+        osc.stop(audioCtx.currentTime + delay + duration);
+    }
+
+    // --- DOM Elements & Logic (Tetap sama seperti perbaikan sebelumnya) ---
+    const startScreen = document.getElementById('start-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const endScreen = document.getElementById('end-screen');
+    const questionContent = document.getElementById('question-content');
+    const controlsArea = document.getElementById('controls-area');
+    const teacherTools = document.getElementById('teacher-tools');
+    const progressBar = document.getElementById('progress-bar');
+    const feedbackMsg = document.getElementById('feedback-msg');
+    const staticRevealBtn = document.getElementById('static-reveal-btn');
+
+    function startQuiz() {
+        playSound('click');
+        startScreen.classList.remove('active');
+        quizScreen.classList.add('active');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        isTransitioning = false;
+        feedbackMsg.style.opacity = '0';
+        staticRevealBtn.innerText = "SHOW ANSWER";
+
+        const data = quizData[currentQuestionIndex];
+        document.getElementById('q-number').innerText = currentQuestionIndex + 1;
+        progressBar.style.width = `${(currentQuestionIndex / quizData.length) * 100}%`;
+
+        let html = `<div class="question-text">${data.question}</div>`;
+        if (data.note) html += `<div style="background:#fff3cd; color:#856404; padding:10px; border-radius:8px; font-size:0.9rem; margin-bottom:10px;">${data.note}</div>`;
+        if (data.content) html += `<div class="arabic-text">${data.content}</div>`;
+
+        if (data.type === 'mcq') {
+            controlsArea.classList.remove('visible');
+            teacherTools.style.display = 'none';
+            html += `<div class="options-grid">`;
+            data.options.forEach((opt, index) => {
+                html += `<div class="option-btn" onclick="handleMCQClick(this, ${index})">${opt}</div>`;
+            });
+            html += `</div>`;
+        } else {
+            controlsArea.classList.add('visible');
+            teacherTools.style.display = 'block';
+            const btns = document.querySelectorAll('.check-btn');
+            btns.forEach(b => b.disabled = false);
+            html += `
+                <div class="input-display">${data.instruction}</div>
+                <div class="hidden-answer" id="the-answer">
+                    <strong>Answer/Model:</strong><br>${data.answer}
+                </div>
+            `;
+        }
+        questionContent.innerHTML = html;
+    }
+
+    function handleMCQClick(element, index) {
+        if (isTransitioning) return;
+        isTransitioning = true;
+        
+        const data = quizData[currentQuestionIndex];
+        const isCorrect = (index === data.correctIndex);
+        const allOptions = document.querySelectorAll('.option-btn');
+        allOptions.forEach(btn => btn.style.pointerEvents = 'none');
+
+        if (isCorrect) {
+            element.classList.add('correct-state');
+            score++;
+            playSound('correct');
+            showFeedback("CORRECT!");
+        } else {
+            element.classList.add('wrong-state');
+            allOptions[data.correctIndex].classList.add('correct-state');
+            playSound('wrong');
+            showFeedback("WRONG!");
+        }
+        setTimeout(nextQuestion, 2000);
+    }
+
+    function toggleAnswer() {
+        playSound('click');
+        const answerBox = document.getElementById('the-answer');
+        if (answerBox) {
+            const isHidden = answerBox.style.display === 'none' || answerBox.style.display === '';
+            answerBox.style.display = isHidden ? 'block' : 'none';
+            staticRevealBtn.innerText = isHidden ? "HIDE ANSWER" : "SHOW ANSWER";
+        }
+    }
+
+    function submitEssay(isCorrect) {
+        if (isTransitioning) return;
+        isTransitioning = true;
+        
+        if (isCorrect) {
+            score++;
+            playSound('correct');
+            showFeedback("CORRECT!");
+        } else {
+            playSound('wrong');
+            showFeedback("WRONG!");
+        }
+
+        const btns = document.querySelectorAll('.check-btn');
+        btns.forEach(b => b.disabled = true);
+        setTimeout(nextQuestion, 2000);
+    }
+
+    function showFeedback(text) {
+        feedbackMsg.innerText = text;
+        feedbackMsg.style.color = text === "CORRECT!" ? "var(--correct)" : "var(--wrong)";
+        feedbackMsg.style.opacity = '1';
+        feedbackMsg.style.transform = 'scale(1.2)';
+        setTimeout(() => feedbackMsg.style.transform = 'scale(1)', 200);
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < quizData.length) {
+            loadQuestion();
+        } else {
+            showEndScreen();
+        }
+    }
+
+    function showEndScreen() {
+        quizScreen.classList.remove('active');
+        endScreen.classList.add('active');
+        progressBar.style.width = '100%';
+        document.getElementById('final-score').innerText = `Score: ${score} / ${quizData.length}`;
+        
+        // Confetti Heboh
+        let count = 0;
+        const interval = setInterval(() => {
+            confettiEffect();
+            count++;
+            if (count > 5) clearInterval(interval);
+        }, 300);
+    }
+
+    function confettiEffect() {
+        const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#2ECC71', '#A29BFE'];
+        for (let i = 0; i < 40; i++) {
+            const conf = document.createElement('div');
+            conf.style.position = 'absolute';
+            conf.style.width = (Math.random() * 10 + 5) + 'px'; 
+            conf.style.height = (Math.random() * 10 + 5) + 'px';
+            conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            conf.style.left = Math.random() * 100 + '%';
+            conf.style.top = '-20px';
+            conf.style.borderRadius = Math.random() > 0.5 ? '50%' : '0px';
+            conf.style.zIndex = '1000';
+            document.body.appendChild(conf);
+            
+            conf.animate([
+                { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
+                { transform: `translate(${(Math.random()-0.5)*400}px, ${window.innerHeight + 50}px) rotate(${Math.random()*720}deg)`, opacity: 0 }
+            ], { duration: 1500 + Math.random() * 1500, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' });
+            
+            setTimeout(() => conf.remove(), 3000);
+        }
+    }
+</script>
+</body>
+</html>
